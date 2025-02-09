@@ -78,17 +78,19 @@ begin_draw :: (ctx: *Supra_Context) {
 }
 
 end_draw :: (ctx: *Supra_Context) {
-    if !cmdbuf {
+    if !ctx.drawState.cmdbuf {
         print("cmdbuf is null, did you forget to start drawing before ending it?\n");
     }
- 	SDL.submit_gpu_command_buffer(cmdbuf);
-    
+ 	SDL.submit_gpu_command_buffer(ctx.drawState.cmdbuf);
+
+    newDrawState : Supra_Draw_State;
+    ctx.drawState = newDrawState;
 }
 
 draw :: (ctx: *Supra_Context) {
-
+    begin_draw(ctx);
     swapchainTexture: *SDL.GPU_Texture;
-    if (!SDL.acquire_gpu_swapchain_texture(cmdbuf, ctx.window, *swapchainTexture, null, null)) {
+    if (!SDL.acquire_gpu_swapchain_texture(ctx.drawState.cmdbuf, ctx.window, *swapchainTexture, null, null)) {
         print("WaitAndAcquireGPUSwapchainTexture failed: %\n", SDL.get_error());
         return;
     }
@@ -99,11 +101,13 @@ draw :: (ctx: *Supra_Context) {
 		colorTargetInfo.clear_color = SDL.F_Color.{ 0.0, 0.0, 0.0, 1.0 };
 		colorTargetInfo.load_op = SDL.GPU_Load_Op.CLEAR;
 		colorTargetInfo.store_op = SDL.GPU_Store_Op.STORE;
-		renderPass := SDL.begin_gpu_render_pass(cmdbuf, *colorTargetInfo, 1, null);
+		renderPass := SDL.begin_gpu_render_pass(ctx.drawState.cmdbuf, *colorTargetInfo, 1, null);
 		SDL.bind_gpu_graphics_pipeline(renderPass, ctx.trixelPipeline);
 		SDL.draw_gpu_primitives(renderPass, 3, 1, 0, 0);
 		SDL.end_gpu_render_pass(renderPass);
 	}
+
+    end_draw(ctx);
 
 	return;
 }
@@ -141,6 +145,9 @@ init :: (w: s32, h: s32, windowName: string) -> (Supra_Context, bool) {
         print("Window claim failed: %\n", SDL.get_error());
         return .{}, false;
     }
+    
+    GpuContext.trixelPipeline = create_pipeline(GpuContext, "tri.vert", "solid.frag");
+    
 	return GpuContext, true;
 }
 

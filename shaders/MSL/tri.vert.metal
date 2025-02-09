@@ -52,7 +52,7 @@ struct Output_0
             if(VertexIndex_0 == 2U)
             {
                 float2 _S3 = float2(0.0, 1.0);
-                (&output_0)->Color_0 = float4(0.0, 0.0, 1.0, 1.0);
+                (&output_0)->Color_0 = float4(1.0, 1.0, 0.0, 1.0);
 
 #line 33
                 pos_0 = _S3;

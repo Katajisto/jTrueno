@@ -3,6 +3,8 @@ rm -rf MSL
 mkdir SPIRV
 mkdir MSL
 
+set -e
+
 for filename in *.vert.slang; do
     if [ -f "$filename" ]; then
         slangc -stage vertex -entry mainf -o "./SPIRV/${filename/.slang/.spv}"  "$filename"
