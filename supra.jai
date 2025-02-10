@@ -20,8 +20,8 @@ load_shader :: (ctx: *Supra_Context, shaderName: string, samplerCount: u32, unif
 
     entrypoint : string = "mainf";
 
-    if SDL.strstr(cFilename, ".vert") { stage = SDL.GPU_Shader_Stage.VERTEX; entrypoint = "main"; }
-    else if SDL.strstr(cFilename, ".frag") { stage = SDL.GPU_Shader_Stage.FRAGMENT; entrypoint = "main"; }
+    if SDL.strstr(cFilename, ".vert") { stage = SDL.GPU_Shader_Stage.VERTEX; }
+    else if SDL.strstr(cFilename, ".frag") { stage = SDL.GPU_Shader_Stage.FRAGMENT; }
     else { print("Invalid shader stage.\n"); return null; }
     
     backendFormats := SDL.get_gpu_shader_formats(ctx.device);
@@ -31,6 +31,7 @@ load_shader :: (ctx: *Supra_Context, shaderName: string, samplerCount: u32, unif
     shaderpath : string;
 
     if backendFormats & SDL.GPU_Shader_Format.MSL {
+        print("Loading metal...\n");
         shaderpath = tprint("%shaders/MSL/%.metal", ctx.basePath, shaderName);
         format = SDL.GPU_Shader_Format.MSL;
     } else if backendFormats & SDL.GPU_Shader_Format.SPIRV {
@@ -71,7 +72,7 @@ load_shader :: (ctx: *Supra_Context, shaderName: string, samplerCount: u32, unif
 begin_draw :: (ctx: *Supra_Context) {
     cmdbuf := SDL.acquire_gpu_command_buffer(ctx.device);
     if !cmdbuf {
-        print("Failed to acquire cmd buf!\n");
+        print("Failed to acquire cmd buf! %\n", yaris.u8_to_string(SDL.get_error()));
         return;
     }
     ctx.drawState.cmdbuf = cmdbuf;
@@ -124,7 +125,7 @@ init :: (w: s32, h: s32, windowName: string) -> (Supra_Context, bool) {
     GpuContext.basePath = yaris.u8_to_string(SDL.get_base_path());
     
 	GpuContext.device = SDL.create_gpu_device(
-		SDL.GPU_Shader_Format.SPIRV,
+		SDL.GPU_Shader_Format.SPIRV | SDL.GPU_Shader_Format.MSL,
 		true,
 		null,
     );

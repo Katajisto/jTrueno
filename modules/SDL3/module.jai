@@ -43,6 +43,12 @@
     #library,system,link_always "libpthread";
 }
 
+#if OS == .MACOS
+{
+    SDL3       :: #library "macos/libSDL3";
+    #library,system,link_always "libm";
+}
+
 // main :: () {}
 
 // Local Variables:
