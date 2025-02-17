@@ -1,6 +1,13 @@
+cbuffer UBO : register(b0, space1)
+{
+    float4x4 transform;
+};
+
 struct Input
 {
-    uint VertexIndex : SV_VertexID;
+    float3 Position : TEXCOORD0;
+    float4 Color : TEXCOORD1;
+    uint instance: SV_InstanceID;
 };
 
 struct Output
@@ -12,28 +19,9 @@ struct Output
 Output mainf(Input input)
 {
     Output output;
-    float2 pos;
-    if (input.VertexIndex == 0)
-    {
-        pos = (-1.0f).xx;
-        output.Color = float4(1.0f, 0.0f, 0.0f, 1.0f);
-    }
-    else
-    {
-        if (input.VertexIndex == 1)
-        {
-            pos = float2(1.0f, -1.0f);
-            output.Color = float4(0.0f, 1.0f, 0.0f, 1.0f);
-        }
-        else
-        {
-            if (input.VertexIndex == 2)
-            {
-                pos = float2(0.0f, 1.0f);
-                output.Color = float4(1.0f, 1.0f, 0.0f, 1.0f);
-            }
-        }
-    }
-    output.Position = float4(pos, 0.0f, 1.0f);
+    output.Color = input.Color;
+    float3 tpos = input.Position;
+    tpos.x += input.instance * 10.0;
+    output.Position = mul(transform, float4(tpos, 1.0f));
     return output;
 }

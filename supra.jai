@@ -18,7 +18,7 @@ load_shader :: (ctx: *Supra_Context, shaderName: string, samplerCount: u32, unif
     stage : SDL.GPU_Shader_Stage;
     cFilename := to_c_string(shaderName);
 
-    entrypoint : string = "mainf";
+    entrypoint : string = "main";
 
     if SDL.strstr(cFilename, ".vert") { stage = SDL.GPU_Shader_Stage.VERTEX; }
     else if SDL.strstr(cFilename, ".frag") { stage = SDL.GPU_Shader_Stage.FRAGMENT; }
@@ -160,7 +160,6 @@ create_pipeline :: (ctx: Supra_Context, vertShaderName: string, fragShaderName: 
     colorTargetDesc : SDL.GPU_Color_Target_Description = .{
         format = SDL.get_gpu_swapchain_texture_format(ctx.device, ctx.window)
     };
-
 
     pipelineCreateInfo : SDL.GPU_Graphics_Pipeline_Create_Info = .{
         target_info = .{
