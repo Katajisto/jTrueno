@@ -16,8 +16,9 @@ load_shader :: (ctx: *Rendering_Context, shaderName: string, samplerCount: u32, 
 
     if backendFormats & SDL.GPU_Shader_Format.MSL {
         print("Loading metal...\n");
-        shaderpath = tprint("%shaders/MSL/%.metal", ctx.basePath, shaderName);
+        shaderpath = tprint("%shaders/MSL/%.msl", ctx.basePath, shaderName);
         format = SDL.GPU_Shader_Format.MSL;
+        entrypoint = "main0";
     } else if backendFormats & SDL.GPU_Shader_Format.SPIRV {
         shaderpath = tprint("%shaders/SPIRV/%.spv", ctx.basePath, shaderName);
         format = SDL.GPU_Shader_Format.SPIRV;

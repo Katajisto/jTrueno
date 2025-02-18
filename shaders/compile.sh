@@ -1,20 +1,13 @@
-rm -rf SPIRV
-rm -rf MSL
-mkdir SPIRV
-mkdir MSL
-
-set -e
-
-for filename in *.vert.slang; do
+for filename in *.vert.hlsl; do
     if [ -f "$filename" ]; then
-        slangc -stage vertex -entry mainf -o "./SPIRV/${filename/.slang/.spv}"  "$filename"
-        slangc -stage vertex -entry mainf -o "./MSL/${filename/.slang/.metal}"    "$filename" 
+        shadercross "$filename" -o "./SPIRV/${filename/.hlsl/.spv}"
+        shadercross "$filename" -o "./MSL/${filename/.hlsl/.msl}"
     fi
 done
 
-for filename in *.frag.slang; do
+for filename in *.frag.hlsl; do
     if [ -f "$filename" ]; then
-        slangc -stage fragment -entry mainf -o "./SPIRV/${filename/.slang/.spv}" "$filename"
-        slangc -stage fragment -entry mainf -o "./MSL/${filename/.slang/.metal}" "$filename"
+        shadercross "$filename" -o "./SPIRV/${filename/.hlsl/.spv}"
+        shadercross "$filename" -o "./MSL/${filename/.hlsl/.msl}"
     fi
 done
