@@ -55,35 +55,35 @@ upload_buffers :: (ctx: *Rendering_Context) {
 		false
 	);
 
-	transferData[0] = .{ -10, -10, -10, 255, 0, 0, 255 };
-	transferData[1] = .{ 10, -10, -10, 255, 0, 0, 255 };
-	transferData[2] = .{ 10, 10, -10, 255, 0, 0, 255 };
-	transferData[3] = .{ -10, 10, -10, 255, 0, 0, 255 };
+	transferData[0] = .{ -TRIXEL_SIZE_HALF, -TRIXEL_SIZE_HALF, -TRIXEL_SIZE_HALF, 255, 0, 0, 255 };
+	transferData[1] = .{ TRIXEL_SIZE_HALF, -TRIXEL_SIZE_HALF, -TRIXEL_SIZE_HALF, 255, 0, 0, 255 };
+	transferData[2] = .{ TRIXEL_SIZE_HALF, TRIXEL_SIZE_HALF, -TRIXEL_SIZE_HALF, 255, 0, 0, 255 };
+	transferData[3] = .{ -TRIXEL_SIZE_HALF, TRIXEL_SIZE_HALF, -TRIXEL_SIZE_HALF, 255, 0, 0, 255 };
 
-	transferData[4] = .{ -10, -10, 10, 255, 255, 0, 255 };
-	transferData[5] = .{ 10, -10, 10, 255, 255, 0, 255 };
-	transferData[6] = .{ 10, 10, 10, 255, 255, 0, 255 };
-	transferData[7] = .{ -10, 10, 10, 255, 255, 0, 255 };
+	transferData[4] = .{ -TRIXEL_SIZE_HALF, -TRIXEL_SIZE_HALF, TRIXEL_SIZE_HALF, 255, 255, 0, 255 };
+	transferData[5] = .{ TRIXEL_SIZE_HALF, -TRIXEL_SIZE_HALF, TRIXEL_SIZE_HALF, 255, 255, 0, 255 };
+	transferData[6] = .{ TRIXEL_SIZE_HALF, TRIXEL_SIZE_HALF, TRIXEL_SIZE_HALF, 255, 255, 0, 255 };
+	transferData[7] = .{ -TRIXEL_SIZE_HALF, TRIXEL_SIZE_HALF, TRIXEL_SIZE_HALF, 255, 255, 0, 255 };
 
-	transferData[8] = .{ -10, -10, -10, 255, 0, 255, 255 };
-	transferData[9] = .{ -10, 10, -10, 255, 0, 255, 255 };
-	transferData[10] = .{ -10, 10, 10, 255, 0, 255, 255 };
-	transferData[11] = .{ -10, -10, 10, 255, 0, 255, 255 };
+	transferData[8] = .{ -TRIXEL_SIZE_HALF, -TRIXEL_SIZE_HALF, -TRIXEL_SIZE_HALF, 255, 0, 255, 255 };
+	transferData[9] = .{ -TRIXEL_SIZE_HALF, TRIXEL_SIZE_HALF, -TRIXEL_SIZE_HALF, 255, 0, 255, 255 };
+	transferData[10] = .{ -TRIXEL_SIZE_HALF, TRIXEL_SIZE_HALF, TRIXEL_SIZE_HALF, 255, 0, 255, 255 };
+	transferData[11] = .{ -TRIXEL_SIZE_HALF, -TRIXEL_SIZE_HALF, TRIXEL_SIZE_HALF, 255, 0, 255, 255 };
 
-	transferData[12] = .{ 10, -10, -10, 0, 255, 0, 255 };
-	transferData[13] = .{ 10, 10, -10, 0, 255, 0, 255 };
-	transferData[14] = .{ 10, 10, 10, 0, 255, 0, 255 };
-	transferData[15] = .{ 10, -10, 10, 0, 255, 0, 255 };
+	transferData[12] = .{ TRIXEL_SIZE_HALF, -TRIXEL_SIZE_HALF, -TRIXEL_SIZE_HALF, 0, 255, 0, 255 };
+	transferData[13] = .{ TRIXEL_SIZE_HALF, TRIXEL_SIZE_HALF, -TRIXEL_SIZE_HALF, 0, 255, 0, 255 };
+	transferData[14] = .{ TRIXEL_SIZE_HALF, TRIXEL_SIZE_HALF, TRIXEL_SIZE_HALF, 0, 255, 0, 255 };
+	transferData[15] = .{ TRIXEL_SIZE_HALF, -TRIXEL_SIZE_HALF, TRIXEL_SIZE_HALF, 0, 255, 0, 255 };
 
-	transferData[16] = .{ -10, -10, -10, 0, 255, 255, 255 };
-	transferData[17] = .{ -10, -10, 10, 0, 255, 255, 255 };
-	transferData[18] = .{ 10, -10, 10, 0, 255, 255, 255 };
-	transferData[19] = .{ 10, -10, -10, 0, 255, 255, 255 };
+	transferData[16] = .{ -TRIXEL_SIZE_HALF, -TRIXEL_SIZE_HALF, -TRIXEL_SIZE_HALF, 0, 255, 255, 255 };
+	transferData[17] = .{ -TRIXEL_SIZE_HALF, -TRIXEL_SIZE_HALF, TRIXEL_SIZE_HALF, 0, 255, 255, 255 };
+	transferData[18] = .{ TRIXEL_SIZE_HALF, -TRIXEL_SIZE_HALF, TRIXEL_SIZE_HALF, 0, 255, 255, 255 };
+	transferData[19] = .{ TRIXEL_SIZE_HALF, -TRIXEL_SIZE_HALF, -TRIXEL_SIZE_HALF, 0, 255, 255, 255 };
 
-	transferData[20] = .{ -10, 10, -10, 0, 0, 255, 255 };
-	transferData[21] = .{ -10, 10, 10, 0, 0, 255, 255 };
-	transferData[22] = .{ 10, 10, 10, 0, 0, 255, 255 };
-	transferData[23] = .{ 10, 10, -10, 0, 0, 255, 255 };
+	transferData[20] = .{ -TRIXEL_SIZE_HALF, TRIXEL_SIZE_HALF, -TRIXEL_SIZE_HALF, 0, 0, 255, 255 };
+	transferData[21] = .{ -TRIXEL_SIZE_HALF, TRIXEL_SIZE_HALF, TRIXEL_SIZE_HALF, 0, 0, 255, 255 };
+	transferData[22] = .{ TRIXEL_SIZE_HALF, TRIXEL_SIZE_HALF, TRIXEL_SIZE_HALF, 0, 0, 255, 255 };
+	transferData[23] = .{ TRIXEL_SIZE_HALF, TRIXEL_SIZE_HALF, -TRIXEL_SIZE_HALF, 0, 0, 255, 255 };
 
 	indexData: *u16 = xx *transferData[24];
 	

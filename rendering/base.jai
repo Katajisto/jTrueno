@@ -3,6 +3,7 @@
 SDL :: #import "SDL3";
 yaris :: #import "Yaris";
 
+#load "../trile/trile.jai";
 #load "pipelines.jai";
 #load "shaders.jai";
 #load "meshes.jai";
@@ -44,16 +45,28 @@ draw :: (ctx: *Rendering_Context) {
         return;
     }
 
-    iList: [2]Instance_Data = .[
-        .{
-            color = .{1, 1, 0, 1},
-            position = .{0, 0, 0, 0}
-        },
-        .{
-            color = .{0, 0, 1, 1},
-            position = .{0, 20, 0, 0}
+    trile: Trile;
+
+    iList: [..]Instance_Data;
+    iList.allocator = temp;
+
+    for x: 0..15 {
+        for y: 0..15 {
+            for z: 0..15 {
+                if !trile.trixels[x][y][z].empty {
+                    array_add(*iList, Instance_Data.{
+                            color = trile.trixels[x][y][z].material.color,
+                            position = .{x * TRIXEL_SIZE, y * TRIXEL_SIZE, z * TRIXEL_SIZE, 0}
+                    });
+                }
+            }
         }
-    ];
+    }
+    
+    array_add(*iList, Instance_Data.{
+            color = .{1, 0, 1, 1},
+            position = .{1/16, 0, 0, 0}
+    });
 
 	if swapchainTexture {
 
@@ -75,7 +88,7 @@ draw :: (ctx: *Rendering_Context) {
         bufferRegion := SDL.GPU_Buffer_Region.{
             buffer = ctx.instanceStorageBuffer,
             offset = 0,
-            size = size_of(Instance_Data) * iList.count
+            size = size_of(Instance_Data) * cast(u32) iList.count
         };
         
         SDL.upload_to_gpu_buffer(
@@ -99,7 +112,7 @@ draw :: (ctx: *Rendering_Context) {
             farPlane,
         );
 
-        view := create_lookat(.{30 * cast(float32) sin(seconds_since_init()), 30, 30 * cast(float32) cos(seconds_since_init())}, .{0,0,0});
+        view := create_lookat(.{3 * cast(float32) sin(seconds_since_init()), 3, 3 * cast(float32) cos(seconds_since_init())}, .{0.5,0.5,0.5});
         viewproj := view * proj;
 
 		colorTargetInfo: SDL.GPU_Color_Target_Info;
@@ -131,10 +144,12 @@ draw :: (ctx: *Rendering_Context) {
         SDL.bind_gpu_index_buffer(renderPass,*index_binding, SDL.GPU_Index_Element_Size.SIZE_16BIT);
         
         SDL.bind_gpu_graphics_pipeline(renderPass, ctx.trixelPipeline);
-		SDL.draw_gpu_indexed_primitives(renderPass, 36, iList.count, 0, 0, 0);
+		SDL.draw_gpu_indexed_primitives(renderPass, 36, cast(u32) iList.count, 0, 0, 0);
 		SDL.end_gpu_render_pass(renderPass);
 	}
  	SDL.submit_gpu_command_buffer(cmdbuf);
+
+    reset_temporary_storage();
 
 	return;
 }
