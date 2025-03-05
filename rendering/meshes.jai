@@ -28,7 +28,27 @@ upload_buffers :: (ctx: *Rendering_Context) {
         ctx.device,
         *transferBufferCreateInfo
     );
+    
+    instanceTransferBufferCreateInfo: SDL.GPU_Transfer_Buffer_Create_Info = .{
+        usage = SDL.GPU_Transfer_Buffer_Usage.UPLOAD,
+        size = size_of(Instance_Data) * 4096 
+    };
 
+    ctx.instanceTransferBuffer = SDL.create_gpu_transfer_buffer(
+        ctx.device,
+        *instanceTransferBufferCreateInfo
+    );
+
+    instanceStorageBufferCreateInfo : SDL.GPU_Buffer_Create_Info = .{
+        usage = SDL.GPU_Buffer_Usage_Flags.GRAPHICS_STORAGE_READ,
+        size = size_of(Instance_Data) * 4096
+    };
+
+    ctx.instanceStorageBuffer = SDL.create_gpu_buffer(
+        ctx.device,
+        *instanceStorageBufferCreateInfo
+    );
+    
 	transferData: *Position_Color_Vertex = SDL.map_gpu_transfer_buffer(
 		ctx.device,
 		transferBuffer,

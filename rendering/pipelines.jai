@@ -1,7 +1,7 @@
 
 
 create_trixel_pipeline :: (ctx: Rendering_Context) -> *SDL.GPU_Graphics_Pipeline {
-    vertexShader := load_shader(*ctx, "tri.vert", 0, 1, 0, 0);
+    vertexShader := load_shader(*ctx, "tri.vert", 0, 1, 1, 0);
     fragShader := load_shader(*ctx, "solid.frag", 0, 1, 0, 0);
 
     colorTargetDesc : SDL.GPU_Color_Target_Description = .{

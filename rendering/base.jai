@@ -22,7 +22,14 @@ Rendering_Context :: struct {
     drawState: Rendering_Draw_State;
     sceneColorTexture: *SDL.GPU_Texture;
     sceneDepthTexture: *SDL.GPU_Texture;
+    instanceTransferBuffer: *SDL.GPU_Transfer_Buffer;
+    instanceStorageBuffer: *SDL.GPU_Buffer;
 };
+
+Instance_Data :: struct {
+    color: Vector4;
+    position: Vector4;
+}
 
 Position_Color_Vertex :: struct {
 	x, y, z: float;
@@ -37,7 +44,49 @@ draw :: (ctx: *Rendering_Context) {
         return;
     }
 
+    iList: [2]Instance_Data = .[
+        .{
+            color = .{1, 1, 0, 1},
+            position = .{0, 0, 0, 0}
+        },
+        .{
+            color = .{0, 0, 1, 1},
+            position = .{0, 20, 0, 0}
+        }
+    ];
+
 	if swapchainTexture {
+
+        dataptr : *Instance_Data = SDL.map_gpu_transfer_buffer(ctx.device, ctx.instanceTransferBuffer, true);
+
+        for 0..iList.count -1 {
+            dataptr[it] = iList[it];
+        }
+        
+        SDL.unmap_gpu_transfer_buffer(ctx.device, ctx.instanceTransferBuffer);
+    
+        copyPass := SDL.begin_gpu_copy_pass(cmdbuf);
+
+        transferBufferLocation := SDL.GPU_Transfer_Buffer_Location.{
+            transfer_buffer = ctx.instanceTransferBuffer,
+            offset = 0
+        };
+
+        bufferRegion := SDL.GPU_Buffer_Region.{
+            buffer = ctx.instanceStorageBuffer,
+            offset = 0,
+            size = size_of(Instance_Data) * iList.count
+        };
+        
+        SDL.upload_to_gpu_buffer(
+            copyPass,  
+            *transferBufferLocation,
+            *bufferRegion,
+            true
+        );
+
+        SDL.end_gpu_copy_pass(copyPass);
+    
         nearPlane := 20.0;
         farPlane := 60.0;
 
@@ -71,6 +120,8 @@ draw :: (ctx: *Rendering_Context) {
 
 		renderPass := SDL.begin_gpu_render_pass(cmdbuf, *colorTargetInfo, 1, *depthStencilTargetInfo);
         
+        SDL.bind_gpu_vertex_storage_buffers(renderPass, 0, *ctx.instanceStorageBuffer, 1);
+        
         SDL.push_gpu_vertex_uniform_data(cmdbuf, 0, viewproj.floats.data, size_of(float) * 16);       
 
         binding : SDL.GPU_Buffer_Binding = .{ buffer = ctx.vertexBuffer, offset = 0};
@@ -80,7 +131,7 @@ draw :: (ctx: *Rendering_Context) {
         SDL.bind_gpu_index_buffer(renderPass,*index_binding, SDL.GPU_Index_Element_Size.SIZE_16BIT);
         
         SDL.bind_gpu_graphics_pipeline(renderPass, ctx.trixelPipeline);
-		SDL.draw_gpu_indexed_primitives(renderPass, 36, 2, 0, 0, 0);
+		SDL.draw_gpu_indexed_primitives(renderPass, 36, iList.count, 0, 0, 0);
 		SDL.end_gpu_render_pass(renderPass);
 	}
  	SDL.submit_gpu_command_buffer(cmdbuf);
