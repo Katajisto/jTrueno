@@ -3,6 +3,22 @@
 
 SDL :: #import,dir "./modules/SDL3";
 
+SDL3_Type_Indicator :: struct {
+    Window_Type : Type : SDL.Window;
+    Font: Type;
+    Font_Effects: Type;
+    Texture: Type;    
+};
+
+indicator :: SDL3_Type_Indicator.{
+    SDL.Window,
+    u32,
+    u32,
+    SDL.Texture
+};
+
+GR :: #import "GetRect_LeftHanded"()(Type_Indicator = type_of(indicator));
+
 #load "rendering/base.jai";
 #load "editor/base.jai";
 #load "yaris/base.jai";
