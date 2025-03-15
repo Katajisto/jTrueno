@@ -140,3 +140,38 @@ upload_buffers :: (ctx: *Rendering_Context) {
     SDL.submit_gpu_command_buffer(uploadBuf);
     SDL.release_gpu_transfer_buffer(ctx.device, transferBuffer);
 }
+
+// TODO: Actually enforce this on the drawing side and force a flush if too many are added.
+MAX_ARBTRI_VERT_AT_ONCE :: 10000;
+
+upload_arbtri_buffers :: (ctx: *Rendering_Context) {
+    vertexBufferCreateInfo : SDL.GPU_Buffer_Create_Info = .{
+        usage = SDL.GPU_Buffer_Usage_Flags.VERTEX,
+        size = size_of(Position_Color_Vertex) * MAX_ARBTRI_VERT_AT_ONCE
+    };
+
+    ctx.arbtriVertexBuffer = SDL.create_gpu_buffer(
+        ctx.device,
+        *vertexBufferCreateInfo
+    );
+
+    indexBufferCreateInfo : SDL.GPU_Buffer_Create_Info = .{
+        usage = SDL.GPU_Buffer_Usage_Flags.INDEX,
+        size = size_of(u16) * MAX_ARBTRI_VERT_AT_ONCE
+    };
+
+    ctx.arbtriIndexBuffer = SDL.create_gpu_buffer(
+        ctx.device,
+        *indexBufferCreateInfo
+    );
+
+    transferBufferCreateInfo: SDL.GPU_Transfer_Buffer_Create_Info = .{
+        usage = SDL.GPU_Transfer_Buffer_Usage.UPLOAD,
+        size = size_of(Position_Color_Vertex) * MAX_ARBTRI_VERT_AT_ONCE + size_of(u16) * MAX_ARBTRI_VERT_AT_ONCE
+    };
+
+    ctx.arbtriTransferBuffer = SDL.create_gpu_transfer_buffer(
+        ctx.device,
+        *transferBufferCreateInfo
+    );
+} 

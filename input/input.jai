@@ -4,6 +4,11 @@ Input_State :: struct {
     keys_currently_down: [..]SDL.Keycode;
     keys_just_down: [..]SDL.Keycode;
     scroll_delta: float;
+    mouse_position: Vector2;
+}
+
+get_mouse_position :: () -> Vector2 {
+    return gInputState.mouse_position;
 }
 
 get_scroll_delta :: () -> float {
@@ -51,6 +56,10 @@ input_begin_frame :: () -> bool {
         }
         if evt.type == SDL.Event_Type.MOUSE_WHEEL {
             gInputState.scroll_delta = evt.wheel.y;
+        }
+        if evt.type == SDL.Event_Type.MOUSE_MOTION {
+            gInputState.mouse_position.x = evt.motion.x;
+            gInputState.mouse_position.y = evt.motion.y;
         }
     }
     return false;

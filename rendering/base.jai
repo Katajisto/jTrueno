@@ -5,6 +5,7 @@
 #load "meshes.jai";
 #load "camera.jai";
 #load "drawing.jai";
+#load "ui.jai";
 
 Instance_Data :: struct {
     color: Vector4;
@@ -16,27 +17,30 @@ Position_Color_Vertex :: struct {
 	r, g, b, a: u8;
 };
 
-draw :: (ctx: *Rendering_Context, editorState: *Editor_State) {
+draw :: (editorState: *Editor_State) {
     trile: Trile;
     camera := get_trile_editor_camera(editorState);
 
-    begin_draw(ctx);
-    render_sky(ctx, *camera);
-    render_trixel_trile(ctx, *trile, *camera);
-    end_draw(ctx);
+    begin_draw(*GpuContext);
+    render_sky(*GpuContext, *camera);
+    render_trixel_trile(*GpuContext, *trile, *camera);
+    print("-- RENDER??? --\n");
+    render_ui();
+    print("-- RENDER OVErRR??? --\n");
+    end_draw(*GpuContext);
 
 
 	return;
 }
 
+GpuContext : Rendering_Context;
 
-init :: (w: s32, h: s32, windowName: string) -> (Rendering_Context, bool) {
+init :: (w: s32, h: s32, windowName: string) -> (bool) {
     if !SDL.init(SDL.Init_Flags.VIDEO | SDL.Init_Flags.GAMEPAD) {
         print("SDL init failed!");
-        return .{}, false;
+        return false;
     }
     
-    GpuContext : Rendering_Context;
 
     GpuContext.basePath = u8_to_string(SDL.get_base_path());
     
@@ -48,23 +52,24 @@ init :: (w: s32, h: s32, windowName: string) -> (Rendering_Context, bool) {
     
     if !GpuContext.device {
         print("GPU createdevice failed");
-        return .{}, false;
+        return false;
     }
 
     GpuContext.window = SDL.create_window(to_c_string(windowName), w, h, 0);
 
     if !GpuContext.window {
         print("Window creation failed: %\n", SDL.get_error());
-        return .{}, false;
+        return false;
     }
 
     if !SDL.claim_window_for_gpu_device(GpuContext.device, GpuContext.window) {
         print("Window claim failed: %\n", SDL.get_error());
-        return .{}, false;
+        return false;
     }
     
     GpuContext.trixelPipeline = create_trixel_pipeline(GpuContext);
     GpuContext.skyPipeline = create_sky_pipeline(GpuContext);
+    GpuContext.arbtriPipeline = create_arbtri_pipeline(GpuContext);
 
     {
         w, h: s32;
@@ -105,7 +110,8 @@ init :: (w: s32, h: s32, windowName: string) -> (Rendering_Context, bool) {
     }
     
     upload_buffers(*GpuContext);
+    upload_arbtri_buffers(*GpuContext);
                 
-	return GpuContext, true;
+	return true;
 }
 
