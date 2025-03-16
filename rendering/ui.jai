@@ -24,6 +24,7 @@ defaultFont: Font;
 
 texture_load_from_memory :: (texture: *SDL.Texture, memory: []u8, srgb: bool, build_mipmaps: bool) -> bool {
     print("Texture load from memory called.\n");
+    load_png_texture_from_memory("test", memory);
     return true;
 }
 set_scissor :: (x0: s32, y0: s32, x1: s32, y: s32)  {
@@ -57,7 +58,6 @@ get_font_at_size :: (memory: [] u8, pixel_height: int) -> *Font {
 // TODO: handle UVs and normal?
 // altough I really don't understand the normal part
 immediate_triangle :: (p0: Vector3, p1: Vector3, p2: Vector3, c0 := Vector4.{1,1,1,1}, c1 := Vector4.{1,1,1,1}, c2 := Vector4.{1,1,1,1}, uv0 := Vector2.{}, uv1 := Vector2.{}, uv2 := Vector2.{}, normal := Vector3.{z=1}) {
-    print("ImTriangle called.\n");
     tri: Arb_Tri;
     tri.pos[0] = p0;
     tri.pos[1] = p1;
@@ -68,17 +68,17 @@ immediate_triangle :: (p0: Vector3, p1: Vector3, p2: Vector3, c0 := Vector4.{1,1
     tri.col[2] = c2;
     arb_tri_add(tri);
 }
+
 immediate_quad :: (p0: Vector2, p1: Vector2, p2: Vector2, p3: Vector2, color := Vector4.{1,1,1,1}, uv0 := Vector2.{0,0}, uv1 := Vector2.{1,0}, uv2 := Vector2.{1,1}, uv3 := Vector2.{0, 1}) {
     to_3d_vec :: (v: Vector2) -> Vector3 {
         return .{v.x, v.y, 0.0};
     }
 
-    print("ImQuad called.\n");
     immediate_triangle(to_3d_vec(p0), to_3d_vec(p1), to_3d_vec(p2), color, color, color, uv0, uv1, uv2);
     immediate_triangle(to_3d_vec(p0), to_3d_vec(p2), to_3d_vec(p3), color, color, color, uv3, uv1, uv2);
 }
+
 immediate_flush :: () {
-    print("ImFlush called.\n");
     arb_tri_flush();
 }
 
@@ -93,9 +93,9 @@ init_ui :: () {
         draw_prepared_text = draw_prepared_text,
         get_mouse_pointer_position = get_mouse_pointer_position,
         get_font_at_size = get_font_at_size,
-        immediate_triangle = immediate_triangle,
-        immediate_quad = immediate_quad,
-        immediate_flush = immediate_flush
+        immediate_triangle = immediate_triangle, // implemented
+        immediate_quad = immediate_quad, // implemented
+        immediate_flush = immediate_flush // implemented
     };
 
     GR.ui_init("", *dp);

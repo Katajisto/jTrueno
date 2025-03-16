@@ -22,6 +22,7 @@ Rendering_Context :: struct {
     trixelPipeline: *SDL.GPU_Graphics_Pipeline;
     skyPipeline: *SDL.GPU_Graphics_Pipeline;
     arbtriPipeline: *SDL.GPU_Graphics_Pipeline;
+    spritePipeline: *SDL.GPU_Graphics_Pipeline;
     
     vertexBuffer: *SDL.GPU_Buffer;
     indexBuffer: *SDL.GPU_Buffer;
@@ -232,7 +233,7 @@ arb_tri_flush :: () {
         vert := it % 3;
         pos := arbTriState.trilist[tri].pos[vert];
         col := arbTriState.trilist[tri].col[vert];
-        transferData[it] = .{transform_to_screen(pos.x), transform_to_screen(pos.y), 0, cast(u8)(col.x * 255), cast(u8)(col.y * 255), cast(u8)(col.z * 255), cast(u8)(col.w * 255)};
+        transferData[it] = .{transform_to_screen(pos.x), transform_to_screen(pos.y) * -1.0, 0, cast(u8)(col.x * 255), cast(u8)(col.y * 255), cast(u8)(col.z * 255), cast(u8)(col.w * 255)};
     }
     
     indexData: *u16 = xx *transferData[vertCount];
@@ -290,17 +291,7 @@ arb_tri_flush :: () {
 	colorTargetInfo.load_op = SDL.GPU_Load_Op.LOAD;
 	colorTargetInfo.store_op = SDL.GPU_Store_Op.STORE;
 
-    depthStencilTargetInfo: SDL.GPU_Depth_Stencil_Target_Info;
-    depthStencilTargetInfo.texture = GpuContext.sceneDepthTexture;
-    depthStencilTargetInfo.cycle = true;
-    depthStencilTargetInfo.clear_depth = 1;
-    depthStencilTargetInfo.clear_stencil = 0;
-    depthStencilTargetInfo.load_op = SDL.GPU_Load_Op.CLEAR;
-    depthStencilTargetInfo.store_op = SDL.GPU_Store_Op.STORE;
-    depthStencilTargetInfo.stencil_load_op = SDL.GPU_Load_Op.CLEAR;
-    depthStencilTargetInfo.stencil_store_op = SDL.GPU_Store_Op.STORE;
-
-	renderPass := SDL.begin_gpu_render_pass(GpuContext.drawState.cmdbuf, *colorTargetInfo, 1, *depthStencilTargetInfo);
+	renderPass := SDL.begin_gpu_render_pass(GpuContext.drawState.cmdbuf, *colorTargetInfo, 1, null);
     binding : SDL.GPU_Buffer_Binding = .{ buffer = GpuContext.arbtriVertexBuffer, offset = 0};
     SDL.bind_gpu_vertex_buffers(renderPass, 0, *binding, 1);
     

@@ -15,7 +15,3 @@ u8_to_string :: (ptr: *u8) -> string {
 	str.count = strlen(ptr);
 	return str;
 }
-
-hlo :: () {
-	print("Hello!!!");
-}

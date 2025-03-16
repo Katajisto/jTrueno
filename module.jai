@@ -1,7 +1,8 @@
 #import "Basic";
 #import "Process";
 
-SDL :: #import,dir "./modules/SDL3";
+SDL :: #import "SDL3";
+SDL_IMG :: #import "SDL3/image";
 
 #load "rendering/base.jai";
 #load "editor/base.jai";
@@ -30,7 +31,6 @@ compile_shaders :: () {
 main :: () {
     ok := init(700, 700, "jTrueno!");
     editorState : Editor_State;
-
 
     quit := false;
    

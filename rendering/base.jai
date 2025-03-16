@@ -6,6 +6,7 @@
 #load "camera.jai";
 #load "drawing.jai";
 #load "ui.jai";
+#load "textures.jai";
 
 Instance_Data :: struct {
     color: Vector4;
@@ -24,9 +25,9 @@ draw :: (editorState: *Editor_State) {
     begin_draw(*GpuContext);
     render_sky(*GpuContext, *camera);
     render_trixel_trile(*GpuContext, *trile, *camera);
-    print("-- RENDER??? --\n");
-    render_ui();
-    print("-- RENDER OVErRR??? --\n");
+    // print("-- RENDER??? --\n");
+    // render_ui();
+    // print("-- RENDER OVErRR??? --\n");
     end_draw(*GpuContext);
 
 
@@ -66,10 +67,8 @@ init :: (w: s32, h: s32, windowName: string) -> (bool) {
         print("Window claim failed: %\n", SDL.get_error());
         return false;
     }
-    
-    GpuContext.trixelPipeline = create_trixel_pipeline(GpuContext);
-    GpuContext.skyPipeline = create_sky_pipeline(GpuContext);
-    GpuContext.arbtriPipeline = create_arbtri_pipeline(GpuContext);
+
+    create_all_pipelines(*GpuContext);
 
     {
         w, h: s32;
@@ -111,6 +110,8 @@ init :: (w: s32, h: s32, windowName: string) -> (bool) {
     
     upload_buffers(*GpuContext);
     upload_arbtri_buffers(*GpuContext);
+
+    create_samplers(*GpuContext);
                 
 	return true;
 }
