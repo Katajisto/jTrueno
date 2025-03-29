@@ -6,6 +6,7 @@
 #load "camera.jai";
 #load "drawing.jai";
 #load "ui.jai";
+#load "sprite.jai";
 #load "textures.jai";
 
 Instance_Data :: struct {
@@ -18,6 +19,11 @@ Position_Color_Vertex :: struct {
 	r, g, b, a: u8;
 };
 
+Position_Texture_Vertex :: struct {
+	x, y, z: float;
+    u, v: float;
+};
+
 draw :: (editorState: *Editor_State) {
     trile: Trile;
     camera := get_trile_editor_camera(editorState);
@@ -25,6 +31,7 @@ draw :: (editorState: *Editor_State) {
     begin_draw(*GpuContext);
     render_sky(*GpuContext, *camera);
     render_trixel_trile(*GpuContext, *trile, *camera);
+    render_sprite(*GpuContext, *camera);
     // print("-- RENDER??? --\n");
     // render_ui();
     // print("-- RENDER OVErRR??? --\n");
@@ -107,6 +114,8 @@ init :: (w: s32, h: s32, windowName: string) -> (bool) {
         );
         
     }
+    
+    load_default_fontsheet();
     
     upload_buffers(*GpuContext);
     upload_arbtri_buffers(*GpuContext);

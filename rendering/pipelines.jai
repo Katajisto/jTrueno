@@ -188,18 +188,30 @@ create_arbtri_pipeline :: (ctx: Rendering_Context) -> *SDL.GPU_Graphics_Pipeline
 }
 
 create_sprite_pipeline :: (ctx: Rendering_Context) -> *SDL.GPU_Graphics_Pipeline {
-    vertexShader := load_shader(*ctx, "sprite.vert", 0, 1, 0, 0);
-    fragShader := load_shader(*ctx, "sprite.frag", 0, 1, 0, 0);
+    vertexShader := load_shader(*ctx, "sprite.vert", 0, 0, 0, 0);
+    fragShader := load_shader(*ctx, "sprite.frag", 1, 0, 0, 0);
+
+    blendState : SDL.GPU_Color_Target_Blend_State = .{
+        enable_blend = true,
+        enable_color_write_mask = false,
+        color_blend_op = SDL.GPU_Blend_Op.ADD,
+        alpha_blend_op = SDL.GPU_Blend_Op.ADD,
+        src_color_blendfactor = SDL.GPU_Blend_Factor.SRC_ALPHA,
+        dst_color_blendfactor = SDL.GPU_Blend_Factor.ONE_MINUS_SRC_ALPHA,
+        src_alpha_blendfactor = SDL.GPU_Blend_Factor.SRC_ALPHA,
+        dst_alpha_blendfactor = SDL.GPU_Blend_Factor.ONE_MINUS_SRC_ALPHA
+    };
 
     colorTargetDesc : SDL.GPU_Color_Target_Description = .{
-        format = SDL.GPU_Texture_Format.R8G8B8A8_UNORM
+        format = SDL.GPU_Texture_Format.R8G8B8A8_UNORM,
+        blend_state = blendState  
     };
 
     vertexBufferDesc : SDL.GPU_Vertex_Buffer_Description = .{
         slot = 0,
         input_rate = SDL.GPU_Vertex_Input_Rate.VERTEX,
         instance_step_rate = 0,
-        pitch = size_of(Position_Color_Vertex) 
+        pitch = size_of(Position_Texture_Vertex) 
     };
 
     attributes : [2] SDL.GPU_Vertex_Attribute;
@@ -211,7 +223,7 @@ create_sprite_pipeline :: (ctx: Rendering_Context) -> *SDL.GPU_Graphics_Pipeline
     };
     attributes[1] = .{
             buffer_slot = 0,
-            format = SDL.GPU_Vertex_Element_Format.UBYTE4_NORM,
+            format = SDL.GPU_Vertex_Element_Format.FLOAT2,
             location = 1,
             offset = size_of(float) * 3
     };
@@ -224,8 +236,8 @@ create_sprite_pipeline :: (ctx: Rendering_Context) -> *SDL.GPU_Graphics_Pipeline
             depth_stencil_format = SDL.GPU_Texture_Format.D16_UNORM
         },
         depth_stencil_state = .{
-            enable_depth_test = true,
-            enable_depth_write = true,
+            enable_depth_test = false,
+            enable_depth_write = false,
             enable_stencil_test = false,
             compare_op = SDL.GPU_Compare_Op.LESS,
             write_mask = 0xFF  

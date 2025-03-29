@@ -134,10 +134,16 @@ render_trixel_trile :: (ctx: *Rendering_Context, trile: *Trile, camera: *Camera)
     
     SDL.push_gpu_vertex_uniform_data(ctx.drawState.cmdbuf, 0, viewproj.floats.data, size_of(float) * 16);       
 
-    binding : SDL.GPU_Buffer_Binding = .{ buffer = ctx.vertexBuffer, offset = 0};
+    trixelMesh, success := get_mesh("base_trixel");
+
+    if !success {
+        print("We haz no trixel mesh, iz real bad, sad! :(\n");
+    }
+
+    binding : SDL.GPU_Buffer_Binding = .{ buffer = trixelMesh.vertexBuffer, offset = 0};
     SDL.bind_gpu_vertex_buffers(renderPass, 0, *binding, 1);
     
-    index_binding : SDL.GPU_Buffer_Binding = .{ buffer = ctx.indexBuffer, offset = 0};
+    index_binding : SDL.GPU_Buffer_Binding = .{ buffer = trixelMesh.indexBuffer, offset = 0};
     SDL.bind_gpu_index_buffer(renderPass,*index_binding, SDL.GPU_Index_Element_Size.SIZE_16BIT);
     
     SDL.bind_gpu_graphics_pipeline(renderPass, ctx.trixelPipeline);
@@ -163,6 +169,12 @@ render_sky :: (ctx: *Rendering_Context, camera: *Camera) {
     depthStencilTargetInfo.store_op = SDL.GPU_Store_Op.STORE;
     depthStencilTargetInfo.stencil_load_op = SDL.GPU_Load_Op.CLEAR;
     depthStencilTargetInfo.stencil_store_op = SDL.GPU_Store_Op.STORE;
+    
+    mesh, success := get_mesh("skybox");
+
+    if !success {
+        print("We haz no trixel mesh, is real bad, sad! :(\n");
+    }
 
 	renderPass := SDL.begin_gpu_render_pass(ctx.drawState.cmdbuf, *colorTargetInfo, 1, *depthStencilTargetInfo);
     
@@ -170,14 +182,52 @@ render_sky :: (ctx: *Rendering_Context, camera: *Camera) {
     
     SDL.push_gpu_vertex_uniform_data(ctx.drawState.cmdbuf, 0, viewproj.floats.data, size_of(float) * 16);       
 
-    binding : SDL.GPU_Buffer_Binding = .{ buffer = ctx.vertexBuffer, offset = 0};
+    binding : SDL.GPU_Buffer_Binding = .{ buffer = mesh.vertexBuffer, offset = 0};
     SDL.bind_gpu_vertex_buffers(renderPass, 0, *binding, 1);
     
-    index_binding : SDL.GPU_Buffer_Binding = .{ buffer = ctx.indexBuffer, offset = 0};
+    index_binding : SDL.GPU_Buffer_Binding = .{ buffer = mesh.indexBuffer, offset = 0};
     SDL.bind_gpu_index_buffer(renderPass,*index_binding, SDL.GPU_Index_Element_Size.SIZE_16BIT);
     
     SDL.bind_gpu_graphics_pipeline(renderPass, ctx.skyPipeline);
 	SDL.draw_gpu_indexed_primitives(renderPass, 36, 1, 0, 0, 0);
+	SDL.end_gpu_render_pass(renderPass);
+}
+
+// Render a single sprite, refactor this to actually take in a bunch of sprite drawing commands at once later.
+render_sprite :: (ctx: *Rendering_Context, camera: *Camera) {
+	colorTargetInfo: SDL.GPU_Color_Target_Info;
+	colorTargetInfo.texture = GpuContext.drawState.swapchainTexture;
+	colorTargetInfo.clear_color = SDL.F_Color.{ 0.6, 0.9, 1.0, 1.0 };
+	colorTargetInfo.load_op = SDL.GPU_Load_Op.LOAD;
+	colorTargetInfo.store_op = SDL.GPU_Store_Op.STORE;
+
+    qmesh, success := get_mesh("base_quad");
+    if !success {
+        print("failed to get quad mesh, big sad :(\n");
+        return;
+    }
+
+	renderPass := SDL.begin_gpu_render_pass(GpuContext.drawState.cmdbuf, *colorTargetInfo, 1, null);
+    binding : SDL.GPU_Buffer_Binding = .{ buffer = qmesh.vertexBuffer, offset = 0};
+    SDL.bind_gpu_vertex_buffers(renderPass, 0, *binding, 1);
+    
+    index_binding : SDL.GPU_Buffer_Binding = .{ buffer = qmesh.indexBuffer, offset = 0};
+    SDL.bind_gpu_index_buffer(renderPass,*index_binding, SDL.GPU_Index_Element_Size.SIZE_16BIT);
+
+    tex, s := get_texture("ui_tex_6");
+
+    if !s {
+        print("Failed to get the test tex!\n");
+    }
+
+    samplerBinding : SDL.GPU_Texture_Sampler_Binding = .{
+        texture = tex,
+        sampler = gSamplers.pointClamp 
+    };
+
+    SDL.bind_gpu_graphics_pipeline(renderPass, GpuContext.spritePipeline);
+    SDL.bind_gpu_fragment_samplers(renderPass, 0, *samplerBinding, 1);
+	SDL.draw_gpu_indexed_primitives(renderPass, qmesh.indexCount, 1, 0, 0, 0);
 	SDL.end_gpu_render_pass(renderPass);
 }
 

@@ -11,8 +11,12 @@ Ui_Font :: struct {
     character_height: u32 = 1;
 }
 
+Ui_Texture :: struct {
+    name: string;
+}
+
 Ui_Type_Indicator :: struct {
-    Texture : Type : SDL.Texture;
+    Texture : Type : Ui_Texture;
     Window_Type: Type : u64;
     Font: Type: Ui_Font;
     Font_Effects: Type: u32;
@@ -22,9 +26,13 @@ Font :: Ui_Font;
 
 defaultFont: Font;
 
-texture_load_from_memory :: (texture: *SDL.Texture, memory: []u8, srgb: bool, build_mipmaps: bool) -> bool {
+ui_texture_counter : u32 = 0;
+
+texture_load_from_memory :: (texture: *Ui_Texture, memory: []u8, srgb: bool, build_mipmaps: bool) -> bool {
     print("Texture load from memory called.\n");
-    load_png_texture_from_memory("test", memory);
+    texname := tprint("ui_tex_%", ui_texture_counter);
+    load_png_texture_from_memory(*GpuContext, copy_string(texname), memory);
+    ui_texture_counter += 1;
     return true;
 }
 set_scissor :: (x0: s32, y0: s32, x1: s32, y: s32)  {
@@ -36,7 +44,7 @@ clear_scissor :: () {
 set_shader_for_color :: (enable_blend := false) {
     print("Set shader for color called.\n");
 }
-set_shader_for_images :: (texture: *SDL.Texture) {
+set_shader_for_images :: (texture: *Ui_Texture) {
     print("Set shader for texture called.\n");
 }
 prepare_text :: (font: *Ui_Type_Indicator.Font, text: string, effects: Ui_Type_Indicator.Font_Effects = 0) -> s64 {
