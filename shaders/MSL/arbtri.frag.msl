@@ -11,12 +11,33 @@ struct main0_out
 struct main0_in
 {
     float4 in_var_TEXCOORD0 [[user(locn0)]];
+    float2 in_var_TEXCOORD1 [[user(locn1)]];
 };
 
-fragment main0_out main0(main0_in in [[stage_in]])
+fragment main0_out main0(main0_in in [[stage_in]], texture2d<float> Texture [[texture(0)]], sampler Sampler [[sampler(0)]])
 {
     main0_out out = {};
-    out.out_var_SV_Target0 = in.in_var_TEXCOORD0;
+    float4 _51;
+    do
+    {
+        bool _43;
+        if (in.in_var_TEXCOORD1.x < (-3.999000072479248046875))
+        {
+            _43 = in.in_var_TEXCOORD1.y < (-1.99899995326995849609375);
+        }
+        else
+        {
+            _43 = false;
+        }
+        if (_43)
+        {
+            _51 = in.in_var_TEXCOORD0;
+            break;
+        }
+        _51 = Texture.sample(Sampler, in.in_var_TEXCOORD1) * in.in_var_TEXCOORD0;
+        break;
+    } while(false);
+    out.out_var_SV_Target0 = _51;
     return out;
 }
 

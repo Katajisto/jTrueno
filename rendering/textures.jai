@@ -105,8 +105,6 @@ load_texture_from_surface :: (ctx: *Rendering_Context, name: string, surface: *S
     SDL.submit_gpu_command_buffer(uploadBuf);
     SDL.release_gpu_transfer_buffer(ctx.device, transferBuffer);
 
-    print("Successfully loaded texture: %\n", name);
-
     return true;
 }
 

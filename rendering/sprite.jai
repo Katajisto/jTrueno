@@ -42,7 +42,6 @@ load_default_fontsheet :: () {
             w = xx sprite.sourceSize.width,
             h = xx sprite.sourceSize.height,
         };
-        print("Adding %\n", sprite.char.value);
 
         HT.table_set(*dFontsheet.charTable, cast,force(u8) sprite.char.value, loc);
     }

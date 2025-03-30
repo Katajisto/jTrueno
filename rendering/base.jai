@@ -9,6 +9,8 @@
 #load "sprite.jai";
 #load "textures.jai";
 
+ENABLE_UI_DEBUG_LOGGING :: false;
+
 Instance_Data :: struct {
     color: Vector4;
     position: Vector4;

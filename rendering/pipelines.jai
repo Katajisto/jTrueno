@@ -126,10 +126,22 @@ create_sky_pipeline :: (ctx: Rendering_Context) -> *SDL.GPU_Graphics_Pipeline {
 
 create_arbtri_pipeline :: (ctx: Rendering_Context) -> *SDL.GPU_Graphics_Pipeline {
     vertexShader := load_shader(*ctx, "arbtri.vert", 0, 1, 0, 0);
-    fragShader := load_shader(*ctx, "arbtri.frag", 0, 1, 0, 0);
+    fragShader := load_shader(*ctx, "arbtri.frag", 1, 1, 0, 0);
 
+    blendState : SDL.GPU_Color_Target_Blend_State = .{
+        enable_blend = true,
+        enable_color_write_mask = false,
+        color_blend_op = SDL.GPU_Blend_Op.ADD,
+        alpha_blend_op = SDL.GPU_Blend_Op.ADD,
+        src_color_blendfactor = SDL.GPU_Blend_Factor.SRC_ALPHA,
+        dst_color_blendfactor = SDL.GPU_Blend_Factor.ONE_MINUS_SRC_ALPHA,
+        src_alpha_blendfactor = SDL.GPU_Blend_Factor.SRC_ALPHA,
+        dst_alpha_blendfactor = SDL.GPU_Blend_Factor.ONE_MINUS_SRC_ALPHA
+    };
+    
     colorTargetDesc : SDL.GPU_Color_Target_Description = .{
-        format = SDL.GPU_Texture_Format.R8G8B8A8_UNORM
+        format = SDL.GPU_Texture_Format.R8G8B8A8_UNORM,
+        blend_state = blendState
     };
 
     vertexBufferDesc : SDL.GPU_Vertex_Buffer_Description = .{

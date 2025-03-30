@@ -16,6 +16,7 @@ Output main(Input input)
 {
     Output output;
     output.Position = float4(input.Position, 1.0);
-    output.Color = float4(input.UV, 0.0, 1.0);
+    output.Color = float4(input.Color);
+    output.UV = input.UV;
     return output;
 }

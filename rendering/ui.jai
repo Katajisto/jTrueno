@@ -33,10 +33,10 @@ defaultFont: Font;
 ui_texture_counter : u32 = 0;
 
 texture_load_from_memory :: (texture: *Ui_Texture, memory: []u8, srgb: bool, build_mipmaps: bool) -> bool {
-    print("Texture load from memory called.\n");
     texname := tprint("ui_tex_%", ui_texture_counter);
     load_png_texture_from_memory(*GpuContext, copy_string(texname), memory);
     ui_texture_counter += 1;
+    texture.name = copy_string(texname);
     return true;
 }
 
@@ -55,16 +55,16 @@ clear_scissor :: () {
 gCurrentTexture : *Ui_Texture = null;
 
 set_shader_for_color :: (enable_blend := false) {
+    if ENABLE_UI_DEBUG_LOGGING { print("Setting shader for color.."); }
     immediate_flush(); // We want to do the flush so we can set the sampler for the entire set.
-    currentTexture = null;
-    print("Set shader for color called.\n");
+    gCurrentTexture = null;
 }
 
 
 set_shader_for_images :: (texture: *Ui_Texture) {
+    if ENABLE_UI_DEBUG_LOGGING { print("Setting shader for textures.."); }
     immediate_flush(); // We want to do the flush so we can set the sampler for the entire set.
-    currentTexture = texture;
-    print("Set shader for texture called.\n");
+    gCurrentTexture = texture;
 }
 
 gPreppedText: string;
@@ -129,9 +129,6 @@ immediate_quad :: (p0: Vector2, p1: Vector2, p2: Vector2, p3: Vector2, color := 
     to_3d_vec :: (v: Vector2) -> Vector3 {
         return .{v.x, v.y, 0.0};
     }
-
-    print("UVS: % % % %\n", uv0, uv1, uv2, uv3);
-
     immediate_triangle(to_3d_vec(p0), to_3d_vec(p1), to_3d_vec(p2), color, color, color, uv0, uv1, uv2);
     immediate_triangle(to_3d_vec(p0), to_3d_vec(p2), to_3d_vec(p3), color, color, color, uv0, uv2, uv3);
 }
@@ -166,18 +163,17 @@ tick_ui :: () {
 checkboxTest : bool = false;
 
 render_ui :: () {
-    print("----------------- STARTING NEW UI RENDER ---------------\n");
-    proc := GR.default_theme_procs[2];
+    proc := GR.default_theme_procs[0];
     my_theme := proc();
     GR.set_default_theme(my_theme);  // Just in case we don't explicitly pass themes sometimes...!
 
-    // r := GR.get_rect(0, 0, 100, 50);
-    // pressed := GR.button(r, "Hello sailor!", null);
+    r := GR.get_rect(0, 0, 400, 30);
+    pressed := GR.button(r, "Hello sailor!", null);
 
-    r2 := GR.get_rect(0, 100, 100, 50);
+    r2 := GR.get_rect(0, 100, 400, 20);
     checkbox_theme := my_theme.checkbox_theme;
     list : []u8;
-    checkbox_theme.font = get_font_at_size(list, 50); // @Cleanup: We have to manually set a font for now.
-    pressed := GR.base_checkbox(r2, "GGGG", checkboxTest, *checkbox_theme, 0);
+    checkbox_theme.font = get_font_at_size(list, 20); // @Cleanup: We have to manually set a font for now.
+    pressed = GR.base_checkbox(r2, "GGGG", checkboxTest, *checkbox_theme, 0);
 }
 

@@ -196,18 +196,19 @@ arb_tri_add :: (tri: Arb_Tri) {
 
 arb_tri_flush :: () {
     if !arbTriState.active {
-        print("Warning: flushing a non-active arbitrary triangle state.");
         return;
     }
 
     arbTriState.active = false;    
-    print("Drawing % triangles!\n", arbTriState.trilist.count);
 
 	transferData: *Position_Color_UV_Vertex = SDL.map_gpu_transfer_buffer(
 		GpuContext.device,
 		GpuContext.arbtriTransferBuffer,
-		false
+		true
 	);
+
+    
+    if ENABLE_UI_DEBUG_LOGGING { print("Drawing % arbtris\n", arbTriState.trilist.count); }
 
     vertCount: u32 = cast(u32) arbTriState.trilist.count * 3;
 
@@ -222,7 +223,6 @@ arb_tri_flush :: () {
         col := arbTriState.trilist[tri].col[vert];
         uv  := arbTriState.trilist[tri].uv[vert];
         transferData[it] = .{transform_to_screen(pos.x), transform_to_screen(pos.y) * -1.0, 0, cast(u8)(col.x * 255), cast(u8)(col.y * 255), cast(u8)(col.z * 255), cast(u8)(col.w * 255), uv.x, uv.y};
-        print("%:%\n", transferData[it].u, transferData[it].v);
     }
     
     indexData: *u16 = xx *transferData[vertCount];
@@ -252,7 +252,7 @@ arb_tri_flush :: () {
      copyPass,
      *loc,
      *bufRegion,
-     false
+     true
     );
 
     loc2 : SDL.GPU_Transfer_Buffer_Location = .{
@@ -268,7 +268,7 @@ arb_tri_flush :: () {
      copyPass,
      *loc2,
      *bufRegion2,
-     false
+     true
     );
 
     SDL.end_gpu_copy_pass(copyPass);
@@ -283,6 +283,27 @@ arb_tri_flush :: () {
 	renderPass := SDL.begin_gpu_render_pass(GpuContext.drawState.cmdbuf, *colorTargetInfo, 1, null);
     binding : SDL.GPU_Buffer_Binding = .{ buffer = GpuContext.arbtriVertexBuffer, offset = 0};
     SDL.bind_gpu_vertex_buffers(renderPass, 0, *binding, 1);
+    
+    if gCurrentTexture {
+        tex, success := get_texture(gCurrentTexture.name);
+        if !success {
+            print("Warning: texture % was not found!\n", gCurrentTexture.name);
+        } else {
+            samplerBinding : SDL.GPU_Texture_Sampler_Binding = .{
+                texture = tex,
+                sampler = gSamplers.pointClamp
+            };
+            SDL.bind_gpu_fragment_samplers(renderPass, 0, *samplerBinding, 1);
+        }
+    } else {
+        tex, success := get_texture("monofont"); // TODO: Replace this with some NULL texture that is always there.
+        samplerBinding : SDL.GPU_Texture_Sampler_Binding = .{
+            texture =tex,
+            sampler = gSamplers.pointClamp
+        };
+        SDL.bind_gpu_fragment_samplers(renderPass, 0, *samplerBinding, 1);
+    }
+    
     
     index_binding : SDL.GPU_Buffer_Binding = .{ buffer = GpuContext.arbtriIndexBuffer, offset = 0};
     SDL.bind_gpu_index_buffer(renderPass,*index_binding, SDL.GPU_Index_Element_Size.SIZE_16BIT);
