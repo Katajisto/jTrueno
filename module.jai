@@ -1,8 +1,9 @@
 #import "Basic";
 #import "Process";
 
-SDL :: #import "SDL3";
+SDL     :: #import "SDL3";
 SDL_IMG :: #import "SDL3/image";
+Jaison  :: #import "Jaison";
 
 #load "rendering/base.jai";
 #load "editor/base.jai";

@@ -1,0 +1,7 @@
+mesh gen for triles
+trile management
+finish ui backend
+3d sprite quad rendering
+shadowmapping (try to do shadowmap evaluation per trixel surface?)
+water and planar reflections
+add support for multiple font atlases

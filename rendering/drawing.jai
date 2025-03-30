@@ -12,32 +12,6 @@ Rendering_Draw_State :: struct {
 	swapchainTexture: *SDL.GPU_Texture;
 };
 
-Rendering_Context :: struct {
-    device: *SDL.GPU_Device;
-    window: *SDL.Window;
-    drawState: Rendering_Draw_State;
-	
-    basePath: string;
-	
-    trixelPipeline: *SDL.GPU_Graphics_Pipeline;
-    skyPipeline: *SDL.GPU_Graphics_Pipeline;
-    arbtriPipeline: *SDL.GPU_Graphics_Pipeline;
-    spritePipeline: *SDL.GPU_Graphics_Pipeline;
-    
-    vertexBuffer: *SDL.GPU_Buffer;
-    indexBuffer: *SDL.GPU_Buffer;
-    
-    arbtriVertexBuffer: *SDL.GPU_Buffer;
-    arbtriIndexBuffer: *SDL.GPU_Buffer;
-    arbtriTransferBuffer: *SDL.GPU_Transfer_Buffer;
-	
-    sceneColorTexture: *SDL.GPU_Texture;
-    sceneDepthTexture: *SDL.GPU_Texture;
-	
-    instanceTransferBuffer: *SDL.GPU_Transfer_Buffer;
-    instanceStorageBuffer: *SDL.GPU_Buffer;
-};
-
 
 begin_draw :: (ctx: *Rendering_Context) {
 	if !!ctx.drawState.cmdbuf {
@@ -193,50 +167,13 @@ render_sky :: (ctx: *Rendering_Context, camera: *Camera) {
 	SDL.end_gpu_render_pass(renderPass);
 }
 
-// Render a single sprite, refactor this to actually take in a bunch of sprite drawing commands at once later.
-render_sprite :: (ctx: *Rendering_Context, camera: *Camera) {
-	colorTargetInfo: SDL.GPU_Color_Target_Info;
-	colorTargetInfo.texture = GpuContext.drawState.swapchainTexture;
-	colorTargetInfo.clear_color = SDL.F_Color.{ 0.6, 0.9, 1.0, 1.0 };
-	colorTargetInfo.load_op = SDL.GPU_Load_Op.LOAD;
-	colorTargetInfo.store_op = SDL.GPU_Store_Op.STORE;
-
-    qmesh, success := get_mesh("base_quad");
-    if !success {
-        print("failed to get quad mesh, big sad :(\n");
-        return;
-    }
-
-	renderPass := SDL.begin_gpu_render_pass(GpuContext.drawState.cmdbuf, *colorTargetInfo, 1, null);
-    binding : SDL.GPU_Buffer_Binding = .{ buffer = qmesh.vertexBuffer, offset = 0};
-    SDL.bind_gpu_vertex_buffers(renderPass, 0, *binding, 1);
-    
-    index_binding : SDL.GPU_Buffer_Binding = .{ buffer = qmesh.indexBuffer, offset = 0};
-    SDL.bind_gpu_index_buffer(renderPass,*index_binding, SDL.GPU_Index_Element_Size.SIZE_16BIT);
-
-    tex, s := get_texture("ui_tex_6");
-
-    if !s {
-        print("Failed to get the test tex!\n");
-    }
-
-    samplerBinding : SDL.GPU_Texture_Sampler_Binding = .{
-        texture = tex,
-        sampler = gSamplers.pointClamp 
-    };
-
-    SDL.bind_gpu_graphics_pipeline(renderPass, GpuContext.spritePipeline);
-    SDL.bind_gpu_fragment_samplers(renderPass, 0, *samplerBinding, 1);
-	SDL.draw_gpu_indexed_primitives(renderPass, qmesh.indexCount, 1, 0, 0, 0);
-	SDL.end_gpu_render_pass(renderPass);
-}
-
 // Drawing arbitrary triangles.
 // Currently used for UI.
 
 Arb_Tri :: struct {
     pos: [3]Vector3;
     col: [3]Vector4;
+    uv: [3]Vector2;
 }
 
 Arb_Tri_State :: struct {
@@ -266,7 +203,7 @@ arb_tri_flush :: () {
     arbTriState.active = false;    
     print("Drawing % triangles!\n", arbTriState.trilist.count);
 
-	transferData: *Position_Color_Vertex = SDL.map_gpu_transfer_buffer(
+	transferData: *Position_Color_UV_Vertex = SDL.map_gpu_transfer_buffer(
 		GpuContext.device,
 		GpuContext.arbtriTransferBuffer,
 		false
@@ -283,7 +220,9 @@ arb_tri_flush :: () {
         vert := it % 3;
         pos := arbTriState.trilist[tri].pos[vert];
         col := arbTriState.trilist[tri].col[vert];
-        transferData[it] = .{transform_to_screen(pos.x), transform_to_screen(pos.y) * -1.0, 0, cast(u8)(col.x * 255), cast(u8)(col.y * 255), cast(u8)(col.z * 255), cast(u8)(col.w * 255)};
+        uv  := arbTriState.trilist[tri].uv[vert];
+        transferData[it] = .{transform_to_screen(pos.x), transform_to_screen(pos.y) * -1.0, 0, cast(u8)(col.x * 255), cast(u8)(col.y * 255), cast(u8)(col.z * 255), cast(u8)(col.w * 255), uv.x, uv.y};
+        print("%:%\n", transferData[it].u, transferData[it].v);
     }
     
     indexData: *u16 = xx *transferData[vertCount];
@@ -306,7 +245,7 @@ arb_tri_flush :: () {
     bufRegion : SDL.GPU_Buffer_Region = .{
      buffer = GpuContext.arbtriVertexBuffer,
      offset = 0,
-     size = size_of(Position_Color_Vertex) * vertCount
+     size = size_of(Position_Color_UV_Vertex) * vertCount
     };
 
     SDL.upload_to_gpu_buffer(
@@ -318,7 +257,7 @@ arb_tri_flush :: () {
 
     loc2 : SDL.GPU_Transfer_Buffer_Location = .{
      transfer_buffer = GpuContext.arbtriTransferBuffer,
-     offset = size_of(Position_Color_Vertex) * vertCount
+     offset = size_of(Position_Color_UV_Vertex) * vertCount
     };
     bufRegion2 : SDL.GPU_Buffer_Region = .{
      buffer = GpuContext.arbtriIndexBuffer,

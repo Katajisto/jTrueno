@@ -14,6 +14,18 @@ Instance_Data :: struct {
     position: Vector4;
 }
 
+Sprite_Instance_Data :: struct {
+    position: Vector4;  // x, y, width, height
+    uv:       Vector4;  // u1, v1, u2, v2
+    color:    Vector4;
+}
+
+Position_Color_UV_Vertex :: struct {
+	x, y, z: float;
+	r, g, b, a: u8;
+    u, v : float;
+};
+
 Position_Color_Vertex :: struct {
 	x, y, z: float;
 	r, g, b, a: u8;
@@ -31,17 +43,49 @@ draw :: (editorState: *Editor_State) {
     begin_draw(*GpuContext);
     render_sky(*GpuContext, *camera);
     render_trixel_trile(*GpuContext, *trile, *camera);
-    render_sprite(*GpuContext, *camera);
-    // print("-- RENDER??? --\n");
-    // render_ui();
-    // print("-- RENDER OVErRR??? --\n");
+    render_ui();
     end_draw(*GpuContext);
 
 
 	return;
 }
 
+Rendering_Context :: struct {
+    device: *SDL.GPU_Device;
+    window: *SDL.Window;
+    drawState: Rendering_Draw_State;
+	
+    basePath: string;
+	
+    trixelPipeline: *SDL.GPU_Graphics_Pipeline;
+    skyPipeline: *SDL.GPU_Graphics_Pipeline;
+    arbtriPipeline: *SDL.GPU_Graphics_Pipeline;
+    spritePipeline: *SDL.GPU_Graphics_Pipeline;
+    
+    vertexBuffer: *SDL.GPU_Buffer;
+    indexBuffer: *SDL.GPU_Buffer;
+    
+    arbtriVertexBuffer: *SDL.GPU_Buffer;
+    arbtriIndexBuffer: *SDL.GPU_Buffer;
+    arbtriTransferBuffer: *SDL.GPU_Transfer_Buffer;
+	
+    sceneColorTexture: *SDL.GPU_Texture;
+    sceneDepthTexture: *SDL.GPU_Texture;
+	
+    instanceTransferBuffer: *SDL.GPU_Transfer_Buffer;
+    instanceStorageBuffer: *SDL.GPU_Buffer;
+
+    spriteInstanceTransferBuffer: *SDL.GPU_Transfer_Buffer;
+    spriteInstanceStorageBuffer: *SDL.GPU_Buffer;
+};
+
 GpuContext : Rendering_Context;
+
+get_render_size :: () -> (s32, s32) {
+    w, h: s32;
+    SDL.get_window_size_in_pixels(GpuContext.window, *w, *h);
+    return w, h;
+}
 
 init :: (w: s32, h: s32, windowName: string) -> (bool) {
     if !SDL.init(SDL.Init_Flags.VIDEO | SDL.Init_Flags.GAMEPAD) {

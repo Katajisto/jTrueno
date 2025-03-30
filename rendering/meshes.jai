@@ -229,8 +229,28 @@ upload_buffers :: (ctx: *Rendering_Context) {
         ctx.device,
         *instanceStorageBufferCreateInfo
     );
-    
 
+    // Create sprite instance buffers
+    spriteInstanceTransferBufferCreateInfo: SDL.GPU_Transfer_Buffer_Create_Info = .{
+        usage = SDL.GPU_Transfer_Buffer_Usage.UPLOAD,
+        size = size_of(Sprite_Instance_Data) * 4096 
+    };
+
+    ctx.spriteInstanceTransferBuffer = SDL.create_gpu_transfer_buffer(
+        ctx.device,
+        *spriteInstanceTransferBufferCreateInfo
+    );
+
+    spriteInstanceStorageBufferCreateInfo : SDL.GPU_Buffer_Create_Info = .{
+        usage = SDL.GPU_Buffer_Usage_Flags.GRAPHICS_STORAGE_READ,
+        size = size_of(Sprite_Instance_Data) * 4096
+    };
+
+    ctx.spriteInstanceStorageBuffer = SDL.create_gpu_buffer(
+        ctx.device,
+        *spriteInstanceStorageBufferCreateInfo
+    );
+    
     verts : [24] Position_Color_Vertex;
 
 	verts[0] = .{ -TRIXEL_SIZE_HALF, -TRIXEL_SIZE_HALF, -TRIXEL_SIZE_HALF, 255, 0, 0, 255 };
@@ -300,7 +320,7 @@ MAX_ARBTRI_VERT_AT_ONCE :: 10000;
 upload_arbtri_buffers :: (ctx: *Rendering_Context) {
     vertexBufferCreateInfo : SDL.GPU_Buffer_Create_Info = .{
         usage = SDL.GPU_Buffer_Usage_Flags.VERTEX,
-        size = size_of(Position_Color_Vertex) * MAX_ARBTRI_VERT_AT_ONCE
+        size = size_of(Position_Color_UV_Vertex) * MAX_ARBTRI_VERT_AT_ONCE
     };
 
     ctx.arbtriVertexBuffer = SDL.create_gpu_buffer(
@@ -320,7 +340,7 @@ upload_arbtri_buffers :: (ctx: *Rendering_Context) {
 
     transferBufferCreateInfo: SDL.GPU_Transfer_Buffer_Create_Info = .{
         usage = SDL.GPU_Transfer_Buffer_Usage.UPLOAD,
-        size = size_of(Position_Color_Vertex) * MAX_ARBTRI_VERT_AT_ONCE + size_of(u16) * MAX_ARBTRI_VERT_AT_ONCE
+        size = size_of(Position_Color_UV_Vertex) * MAX_ARBTRI_VERT_AT_ONCE + size_of(u16) * MAX_ARBTRI_VERT_AT_ONCE
     };
 
     ctx.arbtriTransferBuffer = SDL.create_gpu_transfer_buffer(

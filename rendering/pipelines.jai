@@ -136,10 +136,10 @@ create_arbtri_pipeline :: (ctx: Rendering_Context) -> *SDL.GPU_Graphics_Pipeline
         slot = 0,
         input_rate = SDL.GPU_Vertex_Input_Rate.VERTEX,
         instance_step_rate = 0,
-        pitch = size_of(Position_Color_Vertex) 
+        pitch = size_of(Position_Color_UV_Vertex) 
     };
 
-    attributes : [2] SDL.GPU_Vertex_Attribute;
+    attributes : [3] SDL.GPU_Vertex_Attribute;
     attributes[0] = .{
             buffer_slot = 0,
             format = SDL.GPU_Vertex_Element_Format.FLOAT3,
@@ -151,6 +151,12 @@ create_arbtri_pipeline :: (ctx: Rendering_Context) -> *SDL.GPU_Graphics_Pipeline
             format = SDL.GPU_Vertex_Element_Format.UBYTE4_NORM,
             location = 1,
             offset = size_of(float) * 3
+    };
+    attributes[2] = .{
+            buffer_slot = 0,
+            format = SDL.GPU_Vertex_Element_Format.FLOAT2,
+            location = 2,
+            offset = size_of(float) * 3 + size_of(u8) * 4
     };
 
     pipelineCreateInfo : SDL.GPU_Graphics_Pipeline_Create_Info = .{
@@ -175,7 +181,7 @@ create_arbtri_pipeline :: (ctx: Rendering_Context) -> *SDL.GPU_Graphics_Pipeline
         vertex_input_state = .{
             num_vertex_buffers = 1,
             vertex_buffer_descriptions = *vertexBufferDesc,
-            num_vertex_attributes = 2,
+            num_vertex_attributes = 3,
             vertex_attributes = attributes.data
         },
         primitive_type = SDL.GPU_Primitive_Type.TRIANGLELIST,
@@ -188,7 +194,7 @@ create_arbtri_pipeline :: (ctx: Rendering_Context) -> *SDL.GPU_Graphics_Pipeline
 }
 
 create_sprite_pipeline :: (ctx: Rendering_Context) -> *SDL.GPU_Graphics_Pipeline {
-    vertexShader := load_shader(*ctx, "sprite.vert", 0, 0, 0, 0);
+    vertexShader := load_shader(*ctx, "sprite.vert", 0, 0, 1, 0);
     fragShader := load_shader(*ctx, "sprite.frag", 1, 0, 0, 0);
 
     blendState : SDL.GPU_Color_Target_Blend_State = .{
